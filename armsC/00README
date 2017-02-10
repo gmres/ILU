@@ -1,0 +1,110 @@
+
+
+To run some tests, just try one of the demos 
+   demoArms or demoHB  
+under  matlab. 
+
+A very important file is the  file arms_params.m which is read by many
+of the scripts.  It sets all the parameters needed  for setting up the
+preconditioner and for the iterations, global and inner).  This avoids
+having  to  pass  these  parameters  around or  to  search  for  these
+parameters in the various files to change them when doing tests.
+
+=======================================================================
+CONTENTS
+
+LinvX.m                  : computes  S = inv(L) * X, L and S are sparse
+                           L = lower triangular 
+
+PQ.m                     : creates the nonsymmetric ordering
+PQ_E   		         : a copy of PQ.m
+PQ1.m                    : simple version of PQ orderings.
+
+XUinv.m                  : computes  S = X * inv (U), U, and S are sparse
+                           U = upper  triangular 
+
+arms2.m                  : computes the multilevel arms factorization
+                           [standard arms]
+
+armsC.m                  : computes the multilevel arms factorization
+                           with nonsymmetric permutations for diag. dominance.
+
+arms_params.m            : contains all setup parameters (see above) 
+
+ascend.m                 : ascend operation 
+check_perm               : for debugging - checks permutation
+create_testmatrix        : a little script called by some of the demo files,
+
+demo2.m                  : demo file runs a few solvers
+demo5.m                  : demo file runs only armsC 
+demoArms                 : demo file runs only armsC   [2 levels]
+
+descend.m                : descend operation
+
+drop2.m                  : drop2 drop small elements from a sparse matrix 
+droprow.m                : drop small elements from a sparse row 
+
+fd3d.m                   : non-block finite difference matrix 
+fd3dB.m                  : creates an artifical block matrix.
+
+fgmres.m                 : main global fgmres solver...
+
+iluk                     : incomplete lu factorization with level of fill.
+                           (very slow - not optimized). Not used here.
+
+indset.m                 : independent set reodering 
+indset2.m                : (BLOCK) reodering - for testing-not used/.
+
+lev1arms.m               : computes one level of arms  - use with arms2
+lev1armsC.m              : computes one level of arms  - use with armsC
+
+memus.m                  : gets nnz elements used by arms-type factorizations
+precLU                   : preconditioninig operation for ILU type precon
+presel                   : preselection routine for armsC
+rev_ord                  : computes the reverse ordering
+
+schurprod.m              : schur product w = (C - E inv(B) F) v
+tridiag.m                : creates a tridiagonal matrix.
+
+=======================================================================
+
+SOME COMMENTS ON THE CODES: 
+
+-- they basically follow the implementation in the C-version of arms. 
+
+-- in particular the solves are recursive. A C/C++ implementation should
+   follow the same general idea.
+
+-- The arms and armsC preconditioner are help in an array of matlab structs 
+   (one for each level). The last level is also stored as a similar
+   struct. The struct at each level stores the permutation and the
+   blocks in 
+
+            |\         |       |
+            |  \   U   |       |
+            |    \     |   F   |
+            |  L   \   |       |
+            |        \ |       |
+            |----------|-------|
+            |          |       |
+            |    E     |   C   |  
+            |          |       |
+            
+ so it  contains
+
+   rperm   permutation for this level
+   L       L matrix [see diagram] 
+   U       U matrix [see diagram] 
+   F       F matrix [see diagram]     
+   E       E matrix [see diagram] 
+   C       C matrix [see diagram]  <-- only for last level 
+  The C matrix is actually a NULL matrix -- except for the last level
+  (it is not needed in this implementation for the other levels). 
+ 
+ -- If you ask for nlev levels, you will get nlev+1 structs because
+    the last one is used to store the ILU factors LS and US for 
+    the last Schur complement (in this case, E, F, C are all NULL 
+    matrices) 
+
+======================================================================= 
+

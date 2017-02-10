@@ -1,0 +1,28 @@
+function S = LinvX(L, X, droptol, lfil) 
+% function S = LinvX(L, X, droptol, lfil) 
+% L S = X
+%-----------------------------------------------------------------------
+[n,m] = size(X) ;
+S = sparse(n,m) ; 
+if (n == 0 | m == 0)
+    return
+end
+
+for ii=1:n 
+   [discard, jl, tl] = find(L(ii,:)); 
+   v =X(ii,:);
+   for k=1:length(jl)
+     jrow = jl(k);
+     if (jrow == ii) 
+         diag = tl(k) ;
+     else 
+        v = v - tl(k)*S(jl(k),:);
+     end
+   end 
+   v = droprow(v, droptol, lfil) ; 
+   S(ii,:) = v ./  diag; 
+end 
+
+
+
+
